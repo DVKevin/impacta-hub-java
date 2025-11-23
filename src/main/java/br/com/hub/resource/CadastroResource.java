@@ -20,10 +20,10 @@ import java.sql.SQLException;
 public class CadastroResource {
 
     @Inject
-    private CadastroDao cadastroDao;
+    CadastroDao cadastroDao;
 
     @Inject
-    private ModelMapper modelMapper;
+    ModelMapper modelMapper;
 
     @POST
     public Response cadastrar(@Valid CadastroPerfilDto dto, @Context UriInfo uriInfo) {
@@ -31,12 +31,11 @@ public class CadastroResource {
             Cadastro cadastro = modelMapper.map(dto, Cadastro.class);
             cadastroDao.cadastrar(cadastro);
 
-            // Retorna o DTO de detalhes (pra usar no front)
             DetalhesPerfilDto retorno = modelMapper.map(cadastro, DetalhesPerfilDto.class);
 
-            URI uri = uriInfo.getAbsolutePath(); // ainda sem ID pois sua DAO não retorna ID
+            URI uri = uriInfo.getAbsolutePath(); // sem ID, pois seu método ainda não retorna ID
 
-            return Response.created(uri) // Status Code 201
+            return Response.created(uri)
                     .entity(retorno)
                     .build();
 
@@ -47,4 +46,3 @@ public class CadastroResource {
         }
     }
 }
-
