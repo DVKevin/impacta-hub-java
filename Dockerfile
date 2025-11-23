@@ -1,23 +1,16 @@
-# Etapa 1: Build (Compilação)
-FROM maven:3.9.0-eclipse-temurin-17 AS build
+# Etapa 1: Build
+FROM eclipse-temurin:21-jdk-alpine AS build
+
 WORKDIR /app
-COPY pom.xml .
-COPY src ./src
+COPY . .
 
-# Compila o projeto e gera o quarkus-app
-RUN mvn package -DskipTests
+RUN chmod +x mvnw
+RUN ./mvnw -B -DskipTests clean package
 
-# Etapa 2: Runtime (Execução)
-FROM eclipse-temurin:17-jre-alpine
+# Etapa 2: Runtime
+FROM eclipse-temurin:21-jre-alpine
+
 WORKDIR /app
+COPY --from=build /app/target/quarkus-app/ ./
 
-# Copia apenas o necessário do estágio de build
-COPY --from=build /app/target/quarkus-app/lib/ /app/lib/
-COPY --from=build /app/target/quarkus-app/app/ /app/app/
-COPY --from=build /app/target/quarkus-app/quarkus/ /app/quarkus/
-
-# Expondo porta
-EXPOSE 8080
-
-# Comando para rodar
-ENTRYPOINT ["java", "-jar", "/app/quarkus-run.jar"]
+CMD ["java", "-jar", "quarkus-run.jar"]
